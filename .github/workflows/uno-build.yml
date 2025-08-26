@@ -18,9 +18,6 @@ env:
 
 jobs:
   smoke_test:
-    defaults:
-      run:
-        working-directory: ./uno
     name: Smoke Test (Debug Build of Brixie)
     runs-on: ubuntu-latest
     steps:
