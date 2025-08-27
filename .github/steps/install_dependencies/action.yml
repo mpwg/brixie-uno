@@ -35,7 +35,11 @@ runs:
     - name: Install ${{ inputs.target-platform }} Workloads
       shell: pwsh
       run: |
-        dotnet tool install -g uno.check
+        # Install uno.check into a local tool path to avoid relying on global installs
+        $toolPath = "$env:HOME/.dotnet/tools"
+        dotnet tool install --tool-path $toolPath uno.check
+        # Ensure the tool path is available to subsequent steps by adding it to GITHUB_PATH
+        # Note: use a bash step below to append to $GITHUB_PATH so it affects the job environment
     # Run Uno.Check
     - name: Run Uno.Check
       shell: pwsh
@@ -48,3 +52,15 @@ runs:
             echo "uno-check finished for target: $target "
           }
         })
+    - name: Add dotnet tools to PATH
+      shell: bash
+      run: |
+        echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+    - name: Verify uno-check
+      shell: bash
+      run: |
+        if ! command -v uno-check >/dev/null 2>&1; then
+          echo "uno-check was not found on PATH"
+          exit 1
+        fi
+        uno-check --version || true
